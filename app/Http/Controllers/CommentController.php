@@ -28,7 +28,21 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'user_id' => 'required',
+            'post_id' => 'required',
+            'body' => [
+                'required',
+                'max:255',
+            ],
+        ]);
+
+        $storeData = Comment::create($validatedData);
+        if ($storeData) {
+            return back()->with('scroll_to_bottom', true);
+        }
+        
+        return back()->with('error', 'Error.');
     }
 
     /**
@@ -60,6 +74,11 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        //
+        $destroyData = Comment::destroy($comment->id);
+        if ($destroyData) {
+            return back()->with('scroll_to_bottom', true);
+        }
+        
+        return back()->with('error', 'Error.');
     }
 }
