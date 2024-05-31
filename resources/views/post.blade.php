@@ -5,13 +5,15 @@
         {{-- <a href="{{ URL::previous() }}" class="bg-blue-500 p-3 text-sm font-medium rounded text-white"> &larr; Back</a> --}}
 
         <div class="max-w-screen-sm rounded overflow-hidden shadow-md bg-white m-3">
-            @if (Auth::id() == $post->user->id || Auth::user()->role == 'admin')
-                <form action="{{ route('post.destroy', $post) }}" method="POST">
-                    @method('delete')
-                    @csrf
-                    <button class="float-right m-5" onclick="return confirm('Are you sure?')"><i
-                            class="fa-solid fa-trash m-auto text-red-500"></i></button>
-                </form>
+            @if (Auth::check())
+                @if (Auth::id() == $post->user->id || Auth::user()->role == 'admin')
+                    <form action="{{ route('post.destroy', $post) }}" method="POST">
+                        @method('delete')
+                        @csrf
+                        <button class="float-right m-5" onclick="return confirm('Are you sure?')"><i
+                                class="fa-solid fa-trash m-auto text-red-500"></i></button>
+                    </form>
+                @endif
             @endif
             <p class="p-3 pb-0">
                 {{ $post->title }}
@@ -37,21 +39,24 @@
                         <span class="block sm:inline">{{ session('error') }}</span>
                     </div>
                 @endif
-                <form action="{{ route('comment.store') }}" method="POST">
-                    @csrf
-                    {{-- <p class="h-20 border rounded p-2">Write Comment Section Here --}}
-                    <input type="hidden" name="user_id" value="{{ Auth::id() }}">
-                    <input type="hidden" name="post_id" value="{{ $post->id }}">
-                    <textarea id="body" name="body" rows="4"
-                        class="block p-2.5 w-full text-sm bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-white focus:ring-offset-1 focus:ring-offset-gray-300"
-                        placeholder="Write your thoughts here..."></textarea>
-                    </p>
 
-                    <div class="my-3 flex items-end justify-end">
-                        <button
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Post</button>
-                    </div>
-                </form>
+                @if (Auth::check())
+                    <form action="{{ route('comment.store') }}" method="POST">
+                        @csrf
+                        {{-- <p class="h-20 border rounded p-2">Write Comment Section Here --}}
+                        <input type="hidden" name="user_id" value="{{ Auth::id() }}">
+                        <input type="hidden" name="post_id" value="{{ $post->id }}">
+                        <textarea id="body" name="body" rows="4"
+                            class="block p-2.5 w-full text-sm bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-white focus:ring-offset-1 focus:ring-offset-gray-300"
+                            placeholder="Write your thoughts here..."></textarea>
+                        </p>
+
+                        <div class="my-3 flex items-end justify-end">
+                            <button
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Post</button>
+                        </div>
+                    </form>
+                @endif
 
                 @foreach ($post->comment as $comment)
                     <div class="p-2 hover:bg-gray-100 flex">
@@ -63,14 +68,16 @@
                             </p>
                             <p class="mt-1 text-sm">{{ $comment->body }}</p>
                         </div>
-                        @if (Auth::id() == $comment->user->id || Auth::user()->role == 'admin')
-                            <form action="{{ route('comment.destroy', $comment) }}" method="POST">
-                                @method('delete')
-                                @csrf
-                                <button onclick="return confirm('Are you sure?')"> <i
-                                        class="fa-solid fa-trash m-auto text-red-500"></i>
-                                </button>
-                            </form>
+                        @if (Auth::check())
+                            @if (Auth::id() == $comment->user->id || Auth::user()->role == 'admin')
+                                <form action="{{ route('comment.destroy', $comment) }}" method="POST">
+                                    @method('delete')
+                                    @csrf
+                                    <button onclick="return confirm('Are you sure?')"> <i
+                                            class="fa-solid fa-trash m-auto text-red-500"></i>
+                                    </button>
+                                </form>
+                            @endif
                         @endif
                         {{-- <button> <i class="fa-solid fa-edit m-auto text-blue-500"></i>
                         </button> --}}

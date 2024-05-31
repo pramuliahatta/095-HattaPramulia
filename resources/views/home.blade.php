@@ -14,13 +14,15 @@
         @foreach ($posts as $post)
             <div class="max-w-screen-sm rounded overflow-hidden shadow-md bg-white m-3">
 
-                @if (Auth::id() == $post->user->id || Auth::user()->role == 'admin')
-                    <form action="{{ route('post.destroy', $post) }}" method="POST">
-                        @method('delete')
-                        @csrf
-                        <button class="float-right m-5" onclick="return confirm('Are you sure?')"><i
-                                class="fa-solid fa-trash m-auto text-red-500"></i></button>
-                    </form>
+                @if (Auth::check())
+                    @if (Auth::id() == $post->user->id || Auth::user()->role == 'admin')
+                        <form action="{{ route('post.destroy', $post) }}" method="POST">
+                            @method('delete')
+                            @csrf
+                            <button class="float-right m-5" onclick="return confirm('Are you sure?')"><i
+                                    class="fa-solid fa-trash m-auto text-red-500"></i></button>
+                        </form>
+                    @endif
                 @endif
                 <p class="p-3 pb-0">
                     <a href="{{ route('post.show', ['user' => $post->user->username, 'post' => $post->id]) }}">

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 
 class UserController extends Controller
 {
@@ -14,6 +15,15 @@ class UserController extends Controller
      */
     public function index()
     {
+        if(Route::current()->getName() == 'dashboard.user.index') {
+            if(Auth::user()->role == 'member') {
+                return redirect()->intended(route('home'));
+            }
+            return view('dashboard.user.index', [
+                'title' => 'Users',
+                'users'=> User::all(),
+            ]);
+        }
         return view('login');
     }
 
@@ -167,6 +177,11 @@ class UserController extends Controller
             'password' => 'required',
         ]);
         if (Auth::attempt($credentials)) {
+            if(Auth::user()->is_active == 0) {
+                Auth::logout();
+                return back()->with('error', 'Your account is blocked');
+            }
+
             $request->session()->regenerate();
             if(Auth::user()->role == 'admin') {
                 return redirect()->intended(route('dashboard'));
@@ -182,5 +197,19 @@ class UserController extends Controller
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         return redirect()->intended(route('home'));
+    }
+
+    public function switch(User $user) {
+        if($user->is_active == true) {
+            $data['is_active'] = false;
+        } else {
+            $data['is_active'] = true;
+        }
+        $updateData = User::where('id', $user->id)
+            ->update($data);
+        if ($updateData) {
+            return redirect()->intended(route('dashboard.user.index'))->with('success', 'Profile updated successfully.');
+        }
+        return back()->with('error', 'Error.');
     }
 }

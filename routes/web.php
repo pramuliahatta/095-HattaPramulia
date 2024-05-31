@@ -3,9 +3,7 @@
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\LoginController;
-use App\Models\Comment;
-use App\Models\Post;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PostController::class, 'index'])
@@ -26,12 +24,14 @@ Route::post('/logout', [UserController::class, 'logout'])
     ->name('logout');
 
 Route::get('/profile/{user:username}', [UserController::class, 'edit'])
-    ->name('profile.edit');
+    ->name('profile.edit')
+    ->middleware('auth');
 Route::put('/profile/{user:username}', [UserController::class, 'update'])
     ->name('profile.update');
 
 Route::get('/post/create', [PostController::class, 'create'])
-    ->name('post.create');
+    ->name('post.create')
+    ->middleware('auth');
 Route::post('/post', [PostController::class, 'store'])
     ->name('post.store');
 Route::delete('/post/{post}', [PostController::class, 'destroy'])
@@ -47,12 +47,28 @@ Route::delete('/comment/{comment}', [CommentController::class, 'destroy'])
     ->name('comment.destroy');
 
 Route::get('/dashboard', function () {
+    if(Auth::user()->role == 'member') {
+        return redirect()->intended(route('home'));
+    }
     return view('dashboard.index', [
         'title' => 'Dashboard',
     ]);
     })
     ->name('dashboard')    
     ->middleware('auth');
+Route::get('/dashboard/user', [UserController::class, 'index'])
+    ->name('dashboard.user.index')    
+    ->middleware('auth');
+Route::put('/dashboard/user/{user}', [UserController::class, 'switch'])
+    ->name('dashboard.user.switch')    
+    ->middleware('auth');
+Route::get('/dashboard/post', [PostController::class, 'index'])
+    ->name('dashboard.post.index')    
+    ->middleware('auth');
+Route::get('/dashboard/comment', [CommentController::class, 'index'])
+    ->name('dashboard.comment.index')    
+    ->middleware('auth');
+
 
 // Route::resource('/dashboard/comment', CommentController::class)
 //     ->middleware('auth');

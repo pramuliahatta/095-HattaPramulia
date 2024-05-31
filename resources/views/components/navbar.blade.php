@@ -11,7 +11,6 @@
                         <x-nav-link href="/" :active="request()->is('/')">Home</x-nav-link>
                         @if (Auth::check())
                             <x-nav-link href="/post/{{ Auth::user()->username }}" :active="request()->route()->getName() == 'post.index' &&
-                                !is_null(request()->route()->parameter('user')) &&
                                 request()->route()->parameter('user')->username == Auth::user()->username">Your
                                 Posts</x-nav-link>
                         @endif

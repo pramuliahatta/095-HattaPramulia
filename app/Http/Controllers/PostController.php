@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -17,6 +18,16 @@ class PostController extends Controller
      */
     public function index(User $user)
     {
+        if(Route::current()->getName() == 'dashboard.post.index') {
+            if(Auth::user()->role == 'member') {
+                return redirect()->intended(route('home'));
+            }
+            return view('dashboard.post.index', [
+                'title' => 'Posts',
+                'posts'=> Post::all(),
+            ]);
+        }
+
         if(Route::current()->getName() == 'home') {
             return view('home', [
                 'title' => 'Home',
@@ -128,7 +139,12 @@ class PostController extends Controller
             
             $destroyData = Post::destroy($post->id);
             if ($destroyData) {
-                return redirect()->intended(route('post.index', ['user' => Auth::user()->username]));
+                $parts = explode('/', URL::previous());
+                $number = end($parts);
+                if (is_numeric($number)) {
+                    return redirect()->intended(route('post.index', ['user' => Auth::user()->username]));
+                }
+                return back();
             }    
         }
         return back()->with('error', 'Error.');

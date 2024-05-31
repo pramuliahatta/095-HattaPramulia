@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 class CommentController extends Controller
 {
@@ -12,7 +14,15 @@ class CommentController extends Controller
      */
     public function index()
     {
-        //
+        if(Route::current()->getName() == 'dashboard.comment.index') {
+            if(Auth::user()->role == 'member') {
+                return redirect()->intended(route('home'));
+            }
+            return view('dashboard.comment.index', [
+                'title' => 'Comments',
+                'comments'=> Comment::all(),
+            ]);
+        }
     }
 
     /**
